@@ -7,3 +7,5 @@ type CreateBookingRequest struct {
 	PassengerEmail string `json:"passenger_email"`
 	SeatCount      int32  `json:"seat_count"`
 }
+
+///AAAAAAAA
