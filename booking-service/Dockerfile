@@ -7,13 +7,14 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /app/booking-app ./booking-service/cmd
+RUN go build -o /tmp/booking-app ./booking-service/cmd
+
 FROM alpine:3.19
 
 WORKDIR /app
 
-COPY --from=builder /app/booking-service /app/booking-service
+COPY --from=builder /tmp/booking-app /app/booking-app
 
 EXPOSE 8080
 
-CMD ["/app/booking-service"]
+CMD ["/app/booking-app"]

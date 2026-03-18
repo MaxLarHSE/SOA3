@@ -15,7 +15,9 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("listen")
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(flight_service.AuthInterceptor()),
+	)
 	repo := flight_service.NewPostgresSql()
 	defer repo.Close()
 	server := flight_service.NewServer(repo)

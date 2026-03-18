@@ -3,9 +3,10 @@ package booking_service
 import (
 	"context"
 	"database/sql"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 type Booking struct {
@@ -42,13 +43,7 @@ func NewPostgresSql() *BookingRepo {
 func (r *BookingRepo) Close() {
 	r.db.Close()
 }
-func (r *BookingRepo) CreateBooking(
-	ctx context.Context,
-	id string,
-	userID, flightID, passengerName, passengerEmail string,
-	seatCount int32,
-	totalPrice float64,
-) error {
+func (r *BookingRepo) CreateBooking(ctx context.Context, id string, userID, flightID, passengerName, passengerEmail string, seatCount int32, totalPrice float64) error {
 	query := `
 	INSERT INTO bookings (
 		id,
@@ -165,7 +160,18 @@ func (r *BookingRepo) CancelBooking(ctx context.Context, id string) error {
 	WHERE id = $1
 	`
 
-	_, err := r.db.ExecContext(ctx, query, id)
+	res, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
 
-	return err
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

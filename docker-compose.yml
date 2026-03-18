@@ -69,6 +69,7 @@ services:
     environment:
       DATABASE_URL: "postgres://myuser:mypassword@flight-db:5432/flights?sslmode=disable"
       GRPC_PORT: "50051"
+      FLIGHT_SERVICE_API_KEY: "super-secret-key"
     depends_on:
       flight-flyway:
         condition: service_completed_successfully
@@ -84,6 +85,7 @@ services:
       DATABASE_URL: "postgres://myuser:mypassword@booking-db:5432/bookings?sslmode=disable"
       HTTP_PORT: "8080"
       FLIGHT_SERVICE_ADDR: "flight-service:50051"
+      FLIGHT_SERVICE_API_KEY: "super-secret-key228"
     depends_on:
       booking-flyway:
         condition: service_completed_successfully

@@ -7,14 +7,14 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /app/flight-service-bin ./flight-service/cmd
+RUN go build -o /tmp/flight-app ./flight-service/cmd
 
 FROM alpine:3.19
 
 WORKDIR /app
 
-COPY --from=builder /app/flight-service-bin ./flight-service
+COPY --from=builder /tmp/flight-app /app/flight-app
 
 EXPOSE 50051
 
-CMD ["./flight-service"]
+CMD ["/app/flight-app"]

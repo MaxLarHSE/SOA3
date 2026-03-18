@@ -4,12 +4,20 @@ import (
 	pb "SOA3/gen/proto"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
-	_ "github.com/lib/pq"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"os"
 	"time"
+
+	_ "github.com/lib/pq"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
+
+var (
+	ErrNotEnoughSeats       = errors.New("not enough seats")
+	ErrReservationExists    = errors.New("reservation already exists")
+	ErrReservationNotActive = errors.New("reservation is not active")
 )
 
 type FlightRepo struct {
@@ -245,7 +253,7 @@ func (r *FlightRepo) ReserveSeats(ctx context.Context, flightID string, seatCoun
 
 	var availableSeats int32
 	err = tx.QueryRowContext(ctx,
-		`SELECT available_seats FROM flights WHERE id = $1`,
+		`SELECT available_seats FROM flights WHERE id = $1 FOR UPDATE`,
 		flightID,
 	).Scan(&availableSeats)
 	if err != nil {
@@ -287,20 +295,16 @@ func (r *FlightRepo) ReleaseReservation(ctx context.Context, bookingID string) e
 
 	var flightID string
 	var seatCount int32
-	var status string
 
 	err = tx.QueryRowContext(ctx,
-		`SELECT flight_id, seat_count, status
+		`SELECT flight_id, seat_count
 		 FROM seat_reservations
-		 WHERE booking_id = $1`,
+		 WHERE booking_id = $1 AND status = 'ACTIVE'
+		 FOR UPDATE`,
 		bookingID,
-	).Scan(&flightID, &seatCount, &status)
+	).Scan(&flightID, &seatCount)
 	if err != nil {
 		return err
-	}
-
-	if status != "ACTIVE" {
-		return fmt.Errorf("reservation is not active")
 	}
 
 	_, err = tx.ExecContext(ctx,
@@ -316,7 +320,7 @@ func (r *FlightRepo) ReleaseReservation(ctx context.Context, bookingID string) e
 	_, err = tx.ExecContext(ctx,
 		`UPDATE seat_reservations
 		 SET status = 'RELEASED'
-		 WHERE booking_id = $1`,
+		 WHERE booking_id = $1 AND status = 'ACTIVE'`,
 		bookingID,
 	)
 	if err != nil {

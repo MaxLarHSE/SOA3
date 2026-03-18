@@ -31,28 +31,6 @@ func (h *Handler) GetFlights(w http.ResponseWriter, r *http.Request) {
 
 	origin := r.URL.Query().Get("origin")
 	destination := r.URL.Query().Get("destination")
-
-	if origin == "" || destination == "" {
-		http.Error(w, "origin and destination are required", http.StatusBadRequest)
-		return
-	}
-
-	flights, err := h.flightClient.SearchFlights(ctx, origin, destination, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(flights)
-}
-
-// GET /flights/{id}
-func (h *Handler) GetFlight(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	origin := r.URL.Query().Get("origin")
-	destination := r.URL.Query().Get("destination")
 	dateStr := r.URL.Query().Get("date")
 
 	if origin == "" || destination == "" {
@@ -78,6 +56,25 @@ func (h *Handler) GetFlight(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(flights)
+}
+
+// GET /flights/{id}
+func (h *Handler) GetFlight(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, "flight id is required", http.StatusBadRequest)
+		return
+	}
+
+	flight, err := h.flightClient.GetFlight(ctx, id)
+	if err != nil {
+		http.Error(w, "flight not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(flight)
 }
 
 // POST /bookings
@@ -122,7 +119,8 @@ func (h *Handler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 		totalPrice,
 	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		_ = h.flightClient.ReleaseReservation(ctx, bookingID)
+		http.Error(w, "failed to create booking", http.StatusInternalServerError)
 		return
 	}
 
