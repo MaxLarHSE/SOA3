@@ -33,6 +33,7 @@ func (s *Server) GetFlight(ctx context.Context, req *pb.FlightRequest) (*pb.Flig
 	return f, nil
 }
 
+//asdasd
 func (s *Server) SearchFlights(ctx context.Context, req *pb.FlightsRequest) (*pb.FlightsReply, error) {
 	flights, err := s.repo.SearchFlights(ctx, req.Origin, req.Destination, req.Date)
 	if err != nil {
