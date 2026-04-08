@@ -21,3 +21,9 @@ Content-Type: application/json
 
 ### 5. Получить бронирования пользователя
 GET http://localhost:8080/bookings?user_id=22222222-2222-2222-2222-222222222222
+
+### 5. Получить бронирования пользователя
+GET http://localhost:8080/bookings?user_id=22222222-2222-2222-2222-222222222222
+
+### 6. Получить бронирования пользователя
+POST http://localhost:8080/bookings/8ed20506-6644-4cf0-88bc-35e863b82a3e/cancel
