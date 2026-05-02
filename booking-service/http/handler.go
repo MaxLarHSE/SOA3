@@ -17,7 +17,7 @@ type Handler struct {
 	flightClient *client.FlightClient
 }
 
-// asdasd asdasdasd asdasdasdasd
+// asdasd asdasdasd asdasdasdasd фывфыв
 func NewHandler(
 	bookingRepo *booking_service.BookingRepo,
 	flightClient *client.FlightClient,
