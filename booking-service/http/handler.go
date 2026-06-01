@@ -17,7 +17,6 @@ type Handler struct {
 	flightClient *client.FlightClient
 }
 
-// asdasd asdasdasd asdasdasdasd фывфыв
 func NewHandler(
 	bookingRepo *booking_service.BookingRepo,
 	flightClient *client.FlightClient,
@@ -59,7 +58,6 @@ func (h *Handler) GetFlights(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(flights)
 }
 
-// GET /flights/{id}
 func (h *Handler) GetFlight(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
@@ -78,7 +76,6 @@ func (h *Handler) GetFlight(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(flight)
 }
 
-// POST /bookings
 func (h *Handler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -134,7 +131,6 @@ func (h *Handler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GET /bookings/{id}
 func (h *Handler) GetBookingByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
@@ -153,7 +149,6 @@ func (h *Handler) GetBookingByID(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(booking)
 }
 
-// GET /bookings?user_id=...
 func (h *Handler) GetBookingsByUserID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := r.URL.Query().Get("user_id")
@@ -172,7 +167,6 @@ func (h *Handler) GetBookingsByUserID(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(bookings)
 }
 
-// POST /bookings/{id}/cancel
 func (h *Handler) CancelBooking(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")

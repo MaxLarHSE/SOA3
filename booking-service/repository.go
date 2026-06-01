@@ -32,7 +32,6 @@ func NewPostgresSql() *BookingRepo {
 	if err != nil {
 		log.Fatalf("Ошибка при создании пула соединений: %v", err)
 	}
-	//defer db.Close() НАПИСАТЬ В МЕЙН
 
 	if err := db.Ping(); err != nil {
 		log.Fatalf("База данных недоступна: %v", err)
