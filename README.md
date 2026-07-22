@@ -150,4 +150,3 @@ grpcurl -plaintext \
 - **Тесты только на репозиторий flight-service** — HTTP-хендлеры booking-service (в т.ч. сага с компенсацией) и gRPC-слой юнит-тестами не покрыты; интеграционных тестов с реальным Postgres нет.
 - **Нет graceful shutdown** — сервисы не обрабатывают SIGTERM, `http.ListenAndServe` и `grpcServer.Serve` просто убиваются; в проде нужен drain соединений.
 - **Компенсация не гарантирована**: если `ReleaseReservation` после неудачного `INSERT` тоже упадёт (сеть), места останутся занятыми — нет retry/outbox, ошибка молча игнорируется.
-- **API-ключ захардкожен в docker-compose.yml** (`super-secret-key`) и передаётся по plaintext gRPC (`insecure.NewCredentials`) — в проде нужны секреты и TLS/mTLS.
