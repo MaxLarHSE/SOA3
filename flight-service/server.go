@@ -4,6 +4,7 @@ import (
 	pb "SOA3/gen/proto"
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -11,12 +12,20 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type Server struct {
-	pb.UnimplementedFlightServiceServer
-	repo *FlightRepo
+type FlightRepository interface {
+	GetFlightByID(ctx context.Context, id string) (*pb.Flight, error)
+	SearchFlights(ctx context.Context, origin, destination string, date *timestamppb.Timestamp) ([]*pb.Flight, error)
+	ReserveSeats(ctx context.Context, flightID string, seatCount int32, bookingID string) error
+	ReleaseReservation(ctx context.Context, bookingID string) error
+	CreateFlight(ctx context.Context, f *pb.Flight) (string, error)
 }
 
-func NewServer(repo *FlightRepo) *Server {
+type Server struct {
+	pb.UnimplementedFlightServiceServer
+	repo FlightRepository
+}
+
+func NewServer(repo FlightRepository) *Server {
 	return &Server{
 		repo: repo,
 	}
@@ -25,7 +34,7 @@ func NewServer(repo *FlightRepo) *Server {
 func (s *Server) GetFlight(ctx context.Context, req *pb.FlightRequest) (*pb.Flight, error) {
 	f, err := s.repo.GetFlightByID(ctx, req.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "flight not found")
 		}
 		return nil, status.Error(codes.Internal, err.Error())
@@ -47,10 +56,10 @@ func (s *Server) SearchFlights(ctx context.Context, req *pb.FlightsRequest) (*pb
 func (s *Server) ReserveSeats(ctx context.Context, req *pb.ReserveRequest) (*pb.ReserveReply, error) {
 	err := s.repo.ReserveSeats(ctx, req.FlightId, req.SeatCount, req.BookingId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "flight not found")
 		}
-		if err.Error() == "not enough seats" {
+		if errors.Is(err, ErrNotEnoughSeats) {
 			return nil, status.Error(codes.ResourceExhausted, "not enough seats")
 		}
 		return nil, status.Error(codes.Internal, err.Error())
@@ -64,10 +73,10 @@ func (s *Server) ReserveSeats(ctx context.Context, req *pb.ReserveRequest) (*pb.
 func (s *Server) ReleaseReservation(ctx context.Context, req *pb.ReleaseRequest) (*pb.ReleaseReply, error) {
 	err := s.repo.ReleaseReservation(ctx, req.BookingId)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "reservation not found")
 		}
-		if err.Error() == "reservation is not active" {
+		if errors.Is(err, ErrReservationNotActive) {
 			return nil, status.Error(codes.FailedPrecondition, "reservation is not active")
 		}
 		return nil, status.Error(codes.Internal, err.Error())

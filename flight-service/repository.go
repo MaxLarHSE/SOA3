@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -260,7 +259,7 @@ func (r *FlightRepo) ReserveSeats(ctx context.Context, flightID string, seatCoun
 	}
 
 	if availableSeats < seatCount {
-		return fmt.Errorf("not enough seats")
+		return ErrNotEnoughSeats
 	}
 
 	_, err = tx.ExecContext(ctx,
