@@ -151,4 +151,3 @@ grpcurl -plaintext \
 - **Нет graceful shutdown** — сервисы не обрабатывают SIGTERM, `http.ListenAndServe` и `grpcServer.Serve` просто убиваются; в проде нужен drain соединений.
 - **Компенсация не гарантирована**: если `ReleaseReservation` после неудачного `INSERT` тоже упадёт (сеть), места останутся занятыми — нет retry/outbox, ошибка молча игнорируется.
 - **API-ключ захардкожен в docker-compose.yml** (`super-secret-key`) и передаётся по plaintext gRPC (`insecure.NewCredentials`) — в проде нужны секреты и TLS/mTLS.
-- **Служебный метод `CreateF` (`bebe`/`baba`)** — отладочный способ засеять данные, с захардкоженным рейсом; ему не место в контракте, данные лучше сидировать миграцией.
